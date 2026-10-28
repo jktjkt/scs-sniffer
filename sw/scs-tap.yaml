@@ -1,0 +1,48 @@
+# SCS bus tap: merge into the device config (needs api: and logger:). Copy scs_decoder.h and
+# scs_esphome.h next to the config.
+#   GPIO54 <- Grove T↓R (UART_Tx, module output): SCS pulses, active low
+#   GPIO53 -> Grove R↑T (UART_Rx, module input): held high = receiver on
+# Every frame fires the Home Assistant event esphome.scs_frame with data frame: "A8 31 00 12 01 22 A3".
+# Malformed captures, stray bytes and glitches are logged at WARN with the raw capture.
+
+esphome:
+  includes:
+    - scs_decoder.h
+    - scs_esphome.h
+
+switch:
+  - platform: gpio
+    id: scs_rx_enable
+    pin: GPIO53
+    restore_mode: ALWAYS_ON
+    internal: true
+
+remote_receiver:
+  id: scs_rx
+  pin:
+    number: GPIO54
+    inverted: true  # tap output is active low; marks = SCS pulses
+    mode:
+      input: true
+      pullup: true  # on-board pull-up R11 is only 100 k
+  filter: 2us  # the decoder rejects glitches < 8 us itself
+  idle: 2ms  # longest gap inside a frame is ~0.8 ms
+  use_dma: true
+  rmt_symbols: 512
+  receive_symbols: 512
+  on_raw:
+    then:
+      - lambda: |-
+          scs_esphome::feed(x, [](const std::string &frame) { id(scs_frame_event).execute(frame); });
+
+script:
+  - id: scs_frame_event
+    mode: queued
+    max_runs: 16
+    parameters:
+      frame: string
+    then:
+      - homeassistant.event:
+          event: esphome.scs_frame
+          data:
+            frame: !lambda return frame;
