@@ -11,10 +11,13 @@ When deploying, keep in mind that even call metadata, door opening, etc, are typ
 Everything is in [`sw/`](sw/):
 
 - [`scs_decoder.h`](sw/scs_decoder.h): header-only C++20 decoder that turns pulse timings (e.g., from the ESP32's RMT) into bytes and validated `A8 ... A3` frames.
-- [`scs_decoder_test.cpp`](sw/scs_decoder_test.cpp): its tests, written as `static_assert`s; `make -C sw test` compiles them, so a successful build means they all passed.
+  Frames are 7 or 11 bytes long depending on their first payload byte; payload bytes can take any value, including `A3`.
+- [`scs_protocol.h`](sw/scs_protocol.h): what a frame means, as far as it has been reverse-engineered: lighting/automation commands, state broadcasts, status requests, scenarios, door-entry rings and door lock release.
+  Everything else is reported as `unknown`, with the raw bytes.
+- [`scs_decoder_test.cpp`](sw/scs_decoder_test.cpp), [`scs_protocol_test.cpp`](sw/scs_protocol_test.cpp): tests, written as `static_assert`s; `make -C sw test` compiles them, so a successful build means they all passed.
 - [`scs_esphome.h`](sw/scs_esphome.h) and [`scs-tap.yaml`](sw/scs-tap.yaml): an ESPHome snippet for the M5Stack Unit PoE-P4 ([`U213`](https://docs.m5stack.com/en/unit/Unit_PoE-P4), ESP32-P4).
   The tap's Grove `T↓R` pin goes to GPIO54, and the `R↑T` pin goes to GPIO53, which is held high.
-  Every frame fires the Home Assistant event `esphome.scs_frame`; malformed captures, stray bytes and glitches are logged with the raw capture.
+  Every frame fires the Home Assistant event `esphome.scs_frame` with the raw `frame` (e.g., `A8 91 03 60 08 FA A3`) and its `message` (`ring flat 03`); malformed captures, stray bytes and glitches are logged with the raw capture.
 
 ## Hardware
 

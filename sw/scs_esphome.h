@@ -3,9 +3,11 @@
 // remote_receiver must use an inverted pin, so that the tap's active low is a "mark", and an `idle`
 // longer than any gap inside a frame (2 ms). Each capture is decoded on its own.
 //
-// Every valid frame is handed to the callback as hex ("A8 31 00 12 01 22 A3"). A capture with a
-// decoding error, a byte outside a frame or a glitch is logged at WARN: a summary, the decoded bytes
-// and the raw capture (mark/space durations in us), ready to be replayed with feed_marks_spaces().
+// Every valid frame is handed to the callback as hex ("A8 33 00 12 00 21 A3") together with its
+// meaning ("command 33 on (from 00)", see scs_protocol.h). A5 acknowledgements are logged at DEBUG.
+// A capture with a decoding error, any other byte outside a frame or a glitch is logged at WARN: a
+// summary, the decoded bytes and the raw capture (mark/space durations in us), ready to be replayed
+// with feed_marks_spaces().
 #pragma once
 
 #include <array>
@@ -17,6 +19,7 @@
 #include "esphome/core/log.h"
 
 #include "scs_decoder.h"
+#include "scs_protocol.h"
 
 namespace scs_esphome {
 
@@ -34,7 +37,8 @@ inline std::string hex(const uint8_t *p, std::size_t n) {
 
 // Collects what happened during one capture.
 struct Sink {
-  std::function<void(const std::string &)> on_frame_cb;
+  using FrameCallback = std::function<void(const std::string &frame, const std::string &message)>;
+  FrameCallback on_frame_cb;
   std::array<uint8_t, 64> bytes{};
   std::size_t n_bytes = 0;
   std::array<scs::Error, 8> errors{};
@@ -49,7 +53,12 @@ struct Sink {
       bytes[n_bytes] = b;
     ++n_bytes;
   }
-  void on_stray(uint8_t) { ++n_stray; }
+  void on_stray(uint8_t b) {
+    if (b == scs::kAck)
+      ESP_LOGD(TAG, "ack");
+    else
+      ++n_stray;
+  }
   void on_error(scs::Error e) {
     if (n_errors < errors.size())
       errors[n_errors] = e;
@@ -58,9 +67,10 @@ struct Sink {
   void on_frame(const scs::Frame &f) {
     ++n_frames;
     const std::string s = hex(f.begin(), f.size);
-    ESP_LOGD(TAG, "frame %s", s.c_str());
+    const scs::Text m = scs::describe(scs::parse(f));
+    ESP_LOGD(TAG, "frame %s: %s", s.c_str(), m.c_str());
     if (on_frame_cb)
-      on_frame_cb(s);
+      on_frame_cb(s, m.c_str());
   }
 };
 
@@ -75,7 +85,7 @@ inline void dump_raw(const std::vector<int> &raw) {
   }
 }
 
-inline void feed(const std::vector<int> &raw, std::function<void(const std::string &)> on_frame) {
+inline void feed(const std::vector<int> &raw, Sink::FrameCallback on_frame) {
   static scs::Decoder<Sink> decoder;
   Sink &s = decoder.sink();
   s.on_frame_cb = std::move(on_frame);

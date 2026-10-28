@@ -236,10 +236,11 @@ constexpr bool same(const Frame &f, const std::array<uint8_t, N> &want) {
 
 constexpr auto kF1 = frame7(0x31, 0x00, 0x12, 0x01);
 constexpr auto kF2 = frame7(0x7F, 0x00, 0x55, 0x2A);
-constexpr auto kF11 = frame11({0x01, 0x7F, 0x00, 0x40, 0x13, 0x37, 0x2A, 0x05});
+// An extended frame as published (lighting ON with a parameter): D1 in the first payload byte.
+constexpr auto kF11 = frame11({0xD1, 0x53, 0x01, 0x42, 0x0D, 0x00, 0x00, 0x02});
 
 static_assert(kF1[5] == 0x22);
-static_assert(kF11[9] == (0x01 ^ 0x7F ^ 0x00 ^ 0x40 ^ 0x13 ^ 0x37 ^ 0x2A ^ 0x05));
+static_assert(kF11[9] == 0xCE);
 
 // ---------------------------------------------------------------- tests
 
@@ -406,15 +407,17 @@ constexpr Result kBadChecksum = [] {
 static_assert(kBadChecksum.rec.frames.count == 1 && same(kBadChecksum.rec.frames[0], kF2));
 static_assert(kBadChecksum.rec.errors.count == 1 && kBadChecksum.rec.errors[0] == Error::Checksum);
 
-// Frame cut short by idle, by a new A8, and by the end of the capture. The idle case continues with
-// the rest of kF1: glued together they would form a valid frame, so this checks the gap is honoured.
+// Frame cut short by idle, broken by a restart, and cut short by the end of the capture. The idle
+// case continues with the rest of kF1: glued together they would form a valid frame, so this checks
+// the gap is honoured. In the restart case the broken frame lacks its A3 and decoding resumes at
+// the A8 inside it.
 constexpr Result kTruncated = [] {
   Encoder<512> e;
   e.bytes({0xA8, 0x31, 0x00});
   e.idle(2'000'000);                                     // > frame_gap_ns
   e.bytes({0x12, 0x01, 0x22, 0xA3});
   e.bytes({0xA8, 0x31});
-  e.bytes(kF1);                                          // A8 restarts the frame
+  e.bytes(kF1);                                          // "A8 31 A8 31 00 12 01": no A3
   e.bytes({0xA8, 0x31, 0x00, 0x12});                     // capture ends here
   return decode(e.finish(100'000));                      // shorter than frame_gap_ns
 }();
@@ -422,7 +425,7 @@ static_assert(kTruncated.rec.frames.count == 1 && same(kTruncated.rec.frames[0],
 static_assert(kTruncated.rec.stray.count == 4);
 static_assert(kTruncated.rec.errors.count == 3);
 static_assert(kTruncated.rec.errors[0] == Error::Truncated);
-static_assert(kTruncated.rec.errors[1] == Error::Truncated);
+static_assert(kTruncated.rec.errors[1] == Error::EndByte);
 static_assert(kTruncated.rec.errors[2] == Error::Truncated);
 
 // The RMT end marker on its own closes the capture (no last=true needed).
@@ -437,21 +440,41 @@ constexpr bool rmt_end_marker() {
 }
 static_assert(rmt_end_marker());
 
-// Byte with the high bit set inside a frame, and wrong frame lengths.
+// Payload and checksum bytes take any value, A3 and A8 included: the length delimits a frame.
+// The first two are frames seen on real buses (a state broadcast, a door lock release).
+constexpr std::array<uint8_t, 7> kState = {0xA8, 0xB8, 0x33, 0x12, 0x01, 0x98, 0xA3};
+constexpr std::array<uint8_t, 7> kA3Inside = {0xA8, 0x98, 0xA0, 0x6F, 0xA3, 0xF4, 0xA3};
+constexpr std::array<uint8_t, 7> kA8Inside = {0xA8, 0x31, 0xA8, 0x12, 0x01, 0x8A, 0xA3};
+static_assert(scs::checksum(kState.data() + 1, 4) == kState[5]);
+static_assert(scs::checksum(kA3Inside.data() + 1, 4) == kA3Inside[5]);
+static_assert(scs::checksum(kA8Inside.data() + 1, 4) == kA8Inside[5]);
+
 constexpr Result kFraming = [] {
   Encoder<1024> e;
-  e.bytes({0xA8, 0x31, 0x85, 0x12, 0x01, 0xA7, 0xA3});           // 0x85 not allowed
-  e.bytes({0xA8, 0x31, 0x00, 0x31, 0xA3});                       // 5 bytes, checksum fine
-  e.bytes({0xA8, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11});            // no A3 within 11 bytes
-  e.idle(2'000'000);
+  e.bytes(kState);
+  e.bytes(kA3Inside);
+  e.bytes(kA8Inside);
+  e.bytes({0xA8, 0x31, 0x00, 0x12, 0x01, 0x22, 0xA0});  // A0 where A3 belongs
   e.bytes(kF2);
   return decode(e.finish());
 }();
-static_assert(kFraming.rec.frames.count == 1 && same(kFraming.rec.frames[0], kF2));
-static_assert(kFraming.rec.errors.count == 3);
-static_assert(kFraming.rec.errors[0] == Error::NonDataByte);
-static_assert(kFraming.rec.errors[1] == Error::Length);
-static_assert(kFraming.rec.errors[2] == Error::Length);
+static_assert(kFraming.rec.frames.count == 4);
+static_assert(same(kFraming.rec.frames[0], kState) && same(kFraming.rec.frames[1], kA3Inside));
+static_assert(same(kFraming.rec.frames[2], kA8Inside) && same(kFraming.rec.frames[3], kF2));
+static_assert(kFraming.rec.errors.count == 1 && kFraming.rec.errors[0] == Error::EndByte);
+// A broken extended frame (no A3 at byte 11) with a complete short frame inside: decoding resumes
+// at the inner A8 even though the bytes kept are more than the short frame needs.
+constexpr Result kResyncShorter = [] {
+  Encoder<512> e;
+  e.bytes({0xA8, 0xD1, 0x00});
+  e.bytes(kF1);
+  e.bytes({0x55, 0x01, 0x02});
+  return decode(e.finish());
+}();
+static_assert(kResyncShorter.rec.frames.count == 1 && same(kResyncShorter.rec.frames[0], kF1));
+static_assert(kResyncShorter.rec.errors.count == 1 && kResyncShorter.rec.errors[0] == Error::EndByte);
+static_assert(kResyncShorter.rec.stray.count == 3);
+static_assert(scs::frame_size(0xD1) == 11 && scs::frame_size(0xE3) == 11 && scs::frame_size(0xB8) == 7);
 
 // Bit-level faults: pulse in the stop bit, pulse between bit cells, stuck-low line.
 constexpr Result kBitFaults = [] {

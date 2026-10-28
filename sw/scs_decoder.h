@@ -5,8 +5,11 @@
 //   - '0' bit: an active (low) pulse of ~34 us at the start of the 104.17 us bit cell (9600 baud)
 //   - UART-like framing: start bit ('0'), 8 data bits LSB first, stop bit ('1')
 // Frame layer:
-//   A8 <payload...> <chk> A3, 7 or 11 bytes total, chk = XOR of the payload,
-//   every byte between the delimiters is <= 0x7F.
+//   A8 <payload> <chk> A3, chk = XOR of the payload. The payload is 4 bytes, or 8 bytes when the
+//   high nibble of its first byte is D or E. Payload and checksum may contain any value, A8 and A3
+//   included, so a frame is delimited by its length, not by the first A3. A frame that fails the
+//   A3 or checksum check is reported, and decoding resumes at the next A8 inside it.
+//   A lone A5 outside a frame is an acknowledgement and arrives as a stray byte.
 //
 // Only the falling edge (start) of each pulse carries timing; its width is only used to reject
 // glitches and stuck-low lines. Bits are placed by rounding the edge offset from the start bit to the
@@ -20,7 +23,7 @@
 //
 // Sink interface (all four are required):
 //   void on_byte(uint8_t b);              // every decoded byte, before framing (debug / logging)
-//   void on_stray(uint8_t b);             // byte received outside an A8...A3 frame
+//   void on_stray(uint8_t b);             // byte received outside a frame (A5 = acknowledgement)
 //   void on_frame(const scs::Frame &f);   // complete frame with valid length and checksum
 //   void on_error(scs::Error e);
 #pragma once
@@ -49,10 +52,9 @@ enum class Error : uint8_t {
   LongLow,      // active pulse longer than max_low_ns (bus fault, wrong polarity, stretched signal)
   BitPhase,     // edge too far from any bit cell boundary; byte dropped, edge taken as a new start bit
   StopBit,      // active pulse in the stop bit
-  NonDataByte,  // byte > 0x7F other than A3 inside a frame
-  Length,       // frame is not 7 or 11 bytes long
+  EndByte,      // no A3 where the frame length puts it
   Checksum,     // XOR of the payload does not match
-  Truncated,    // frame not closed by A3 (idle, end of capture, or a new A8)
+  Truncated,    // frame cut short by idle or the end of the capture
 };
 
 constexpr const char *to_string(Error e) {
@@ -60,8 +62,7 @@ constexpr const char *to_string(Error e) {
     case Error::LongLow: return "long low";
     case Error::BitPhase: return "bit phase";
     case Error::StopBit: return "stop bit";
-    case Error::NonDataByte: return "non-data byte in frame";
-    case Error::Length: return "bad frame length";
+    case Error::EndByte: return "no end byte";
     case Error::Checksum: return "checksum";
     case Error::Truncated: return "truncated frame";
   }
@@ -76,6 +77,12 @@ struct Frame {
   constexpr const uint8_t *begin() const { return data.data(); }
   constexpr const uint8_t *end() const { return data.data() + size; }
 };
+
+// Total frame size, A8 and A3 included, given the first payload byte.
+constexpr std::size_t frame_size(uint8_t first_payload_byte) {
+  const uint8_t hi = first_payload_byte >> 4;
+  return hi == 0xD || hi == 0xE ? kLongFrameSize : kShortFrameSize;
+}
 
 constexpr uint8_t checksum(const uint8_t *payload, std::size_t n) {
   uint8_t x = 0;
@@ -235,45 +242,36 @@ class Decoder {
   }
 
   constexpr void frame_byte_(uint8_t b) {
-    if (b == kFrameStart) {
-      if (frame_.size != 0)
-        sink_.on_error(Error::Truncated);
-      frame_.data[0] = b;
-      frame_.size = 1;
-      return;
-    }
-    if (frame_.size == 0) {
+    if (frame_.size == 0 && b != kFrameStart) {
       sink_.on_stray(b);
       return;
     }
     frame_.data[frame_.size++] = b;
-    if (b == kFrameEnd) {
-      complete_frame_();
+    const std::size_t n = frame_.size;
+    if (n < 2 || n < frame_size(frame_.data[1]))
+      return;
+    if (frame_.data[n - 1] != kFrameEnd) {
+      sink_.on_error(Error::EndByte);
+    } else if (checksum(frame_.data.data() + 1, n - 3) != frame_.data[n - 2]) {
+      sink_.on_error(Error::Checksum);
+    } else {
+      sink_.on_frame(frame_);
       frame_.size = 0;
       return;
     }
-    if (b & 0x80) {
-      frame_.size = 0;
-      sink_.on_error(Error::NonDataByte);
-      return;
-    }
-    if (frame_.size == kMaxFrameSize) {  // no room left for A3
-      frame_.size = 0;
-      sink_.on_error(Error::Length);
-    }
+    resync_();
   }
 
-  constexpr void complete_frame_() {
-    const std::size_t n = frame_.size;
-    if (n != kShortFrameSize && n != kLongFrameSize) {
-      sink_.on_error(Error::Length);
-      return;
-    }
-    if (checksum(frame_.data.data() + 1, n - 3) != frame_.data[n - 2]) {
-      sink_.on_error(Error::Checksum);
-      return;
-    }
-    sink_.on_frame(frame_);
+  // Drop the rejected frame and feed what followed its first inner A8 again. The new start may
+  // call for a shorter frame than the bytes kept, so they go through frame_byte_() one by one.
+  constexpr void resync_() {
+    const Frame rejected = frame_;
+    frame_.size = 0;
+    std::size_t i = 1;
+    while (i < rejected.size && rejected.data[i] != kFrameStart)
+      ++i;
+    for (; i < rejected.size; ++i)
+      frame_byte_(rejected.data[i]);
   }
 
   Sink sink_;

@@ -1,13 +1,16 @@
-# SCS bus tap: merge into the device config (needs api: and logger:). Copy scs_decoder.h and
-# scs_esphome.h next to the config.
+# SCS bus tap: merge into the device config (needs api: and logger:). Copy scs_decoder.h,
+# scs_protocol.h and scs_esphome.h next to the config.
 #   GPIO54 <- Grove T↓R (UART_Tx, module output): SCS pulses, active low
 #   GPIO53 -> Grove R↑T (UART_Rx, module input): held high = receiver on
-# Every frame fires the Home Assistant event esphome.scs_frame with data frame: "A8 31 00 12 01 22 A3".
+# Every frame fires the Home Assistant event esphome.scs_frame with data
+#   frame: "A8 91 03 60 08 FA A3"
+#   message: "ring flat 03"
 # Malformed captures, stray bytes and glitches are logged at WARN with the raw capture.
 
 esphome:
   includes:
     - scs_decoder.h
+    - scs_protocol.h
     - scs_esphome.h
 
 switch:
@@ -33,7 +36,9 @@ remote_receiver:
   on_raw:
     then:
       - lambda: |-
-          scs_esphome::feed(x, [](const std::string &frame) { id(scs_frame_event).execute(frame); });
+          scs_esphome::feed(x, [](const std::string &frame, const std::string &message) {
+            id(scs_frame_event).execute(frame, message);
+          });
 
 script:
   - id: scs_frame_event
@@ -41,8 +46,10 @@ script:
     max_runs: 16
     parameters:
       frame: string
+      message: string
     then:
       - homeassistant.event:
           event: esphome.scs_frame
           data:
             frame: !lambda return frame;
+            message: !lambda return message;
