@@ -3779,7 +3779,7 @@
 <text x="463" y="462.0" font-size="4.6" fill="#222" text-anchor="start">R6 → 0 Ω. SHIELD = iso GND; terminal G = SCS BUS −.</text>
 <circle cx="456" cy="471.4" r="3.2" fill="#e00000"/>
 <text x="456" y="473.09999999999997" font-size="4.4" fill="#fff" text-anchor="middle" font-weight="bold">6</text>
-<text x="463" y="473.0" font-size="4.6" fill="#222" text-anchor="start">GDT1, GDT2: remove.</text>
+<text x="463" y="473.0" font-size="4.6" fill="#222" text-anchor="start">GDT1, GDT2: remove. Once fired, a GDT across the 27 V bus supply would keep conducting.</text>
 <circle cx="456" cy="482.4" r="3.2" fill="#b0008a"/>
 <text x="456" y="484.09999999999997" font-size="4.4" fill="#fff" text-anchor="middle" font-weight="bold">7</text>
 <text x="463" y="484.0" font-size="4.6" fill="#222" text-anchor="start">TSS3 → R102 4.7k 1 % 1206, C101 2.2 nF C0G/X7R 1206 stacked on it.</text>
