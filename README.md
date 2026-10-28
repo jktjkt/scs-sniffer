@@ -34,7 +34,7 @@ Also remove a few other, hand-soldering-friendly components, and place a bunch o
 - one 10µF ≥16V X5R/X7R 1206 capacitor
 - one 2.2nF C0G/X7R 1206 capacitor
 
-![Modified schematic](docs/schematic.svg)
+[![Modified schematic](docs/schematic.svg)](docs/schematic.pdf)
 
 Here are the SMD removals and replacements:
 
