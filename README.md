@@ -6,6 +6,16 @@ We are interested in logging some basic events, such as "which unit opened the g
 This does *not* capture the audio or video streams, and that's by design because we do not really want to stomp on people's privacy.
 When deploying, keep in mind that even call metadata, door opening, etc, are typically [PII](https://en.wikipedia.org/wiki/Personal_data).
 
+## Software
+
+Everything is in [`sw/`](sw/):
+
+- [`scs_decoder.h`](sw/scs_decoder.h): header-only C++20 decoder that turns pulse timings (e.g., from the ESP32's RMT) into bytes and validated `A8 ... A3` frames.
+- [`scs_decoder_test.cpp`](sw/scs_decoder_test.cpp): its tests, written as `static_assert`s; `make -C sw test` compiles them, so a successful build means they all passed.
+- [`scs_esphome.h`](sw/scs_esphome.h) and [`scs-tap.yaml`](sw/scs-tap.yaml): an ESPHome snippet for the M5Stack Unit PoE-P4 ([`U213`](https://docs.m5stack.com/en/unit/Unit_PoE-P4), ESP32-P4).
+  The tap's Grove `T↓R` pin goes to GPIO54, and the `R↑T` pin goes to GPIO53, which is held high.
+  Every frame fires the Home Assistant event `esphome.scs_frame`; malformed captures, stray bytes and glitches are logged with the raw capture.
+
 ## Hardware
 
 It looks like this is a job for F454, which has been EOL-ed by Legrand, so we have to build some simple bus sniffer.
@@ -53,13 +63,3 @@ Then, connect the positive end of the SCS bus to terminal A or B, and the negati
 This project was born out of frustration when a five-year-old building is already half-obsolete in 2026.
 The actual SCS bus reverse engineering was done by many people, but I read mainly [the work of Michael Stapelberg](https://michael.stapelberg.ch/posts/2021-03-13-nuki-scs-series-overview/).
 HW ideas and the RS-485 repurposing are mine, and the actual implementation was tremendously accelerated via use of Claude.
-
-## Software
-
-Everything is in [`sw/`](sw/):
-
-- [`scs_decoder.h`](sw/scs_decoder.h): header-only C++20 decoder that turns pulse timings (e.g., from the ESP32's RMT) into bytes and validated `A8 ... A3` frames.
-- [`scs_decoder_test.cpp`](sw/scs_decoder_test.cpp): its tests, written as `static_assert`s; `make -C sw test` compiles them, so a successful build means they all passed.
-- [`scs_esphome.h`](sw/scs_esphome.h) and [`scs-tap.yaml`](sw/scs-tap.yaml): an ESPHome snippet for the M5Stack Unit PoE-P4 ([`U213`](https://docs.m5stack.com/en/unit/Unit_PoE-P4), ESP32-P4).
-  The tap's Grove `T↓R` pin goes to GPIO54, and the `R↑T` pin goes to GPIO53, which is held high.
-  Every frame fires the Home Assistant event `esphome.scs_frame`; malformed captures, stray bytes and glitches are logged with the raw capture.
