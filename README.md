@@ -64,5 +64,15 @@ Then, connect the positive end of the SCS bus to terminal A or B, and the negati
 ## Credits
 
 This project was born out of frustration when a five-year-old building is already half-obsolete in 2026.
-The actual SCS bus reverse engineering was done by many people, but I read mainly [the work of Michael Stapelberg](https://michael.stapelberg.ch/posts/2021-03-13-nuki-scs-series-overview/).
 HW ideas and the RS-485 repurposing are mine, and the actual implementation was tremendously accelerated via use of Claude.
+
+The actual SCS bus reverse engineering was done by many people, but I read mainly [the work of Michael Stapelberg](https://michael.stapelberg.ch/posts/2021-03-13-nuki-scs-series-overview/).
+Notable mentions:
+
+- Michael Stapelberg: [SCS signal decoding](https://michael.stapelberg.ch/posts/2020-09-28-nuki-scs-bticino-decoding/), [processing SCS with a microcontroller](https://michael.stapelberg.ch/posts/2020-11-30-scs-processing-microcontroller/) (bus levels: 28 V idle, 22 V low), [smart intercom backpack](https://michael.stapelberg.ch/posts/2021-03-13-smart-intercom-backpack/) and [intercom-backpack](https://github.com/stapelberg/intercom-backpack) (ring frames)
+- [Bus SCS on Italian Wikipedia](https://it.wikipedia.org/wiki/Bus_SCS) (bit timing and checksum; its framing description is inaccurate)
+- Guido Pagani: [SCS bus log](https://guidopic.altervista.org/eibscout/logticino.html) and [EIB/SCS gateway](http://guidopic.altervista.org/alter/eibscsgt.html) (commands, states, acknowledgements)
+- [flavio/scsgate](https://github.com/flavio/scsgate/blob/master/scsgate/messages.py) (message types)
+- [r0bb10/ESPHome-SCS-Bridge](https://github.com/r0bb10/ESPHome-SCS-Bridge) (action codes, extended frames, door lock release)
+- BTicino product data sheet [BT00646](https://assets.legrand.com/pim/NP-FT-GT/BT00646-c-IT.pdf) (18–27 V bus supply)
+- TechOverflow on the KNX TP1 [pulse voltage](https://techoverflow.net/?p=11263) and [timing](https://techoverflow.net/2023/09/24/how-long-is-the-knx-tp1-active-pulse-equalization-pulse), a similar physical layer
