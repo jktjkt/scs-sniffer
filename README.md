@@ -3,6 +3,8 @@
 Our building complex has an intercom from Bticino (Legrand).
 Even though we were provisioned in 2021, we're on a proprietary, 2-wire bus called [SCS](https://en.wikipedia.org/wiki/Bus_SCS).
 We are interested in logging some basic events, such as "which unit opened the garage door".
+This does *not* capture the audio or video streams, and that's by design because we do not really want to stomp on people's privacy.
+When deploying, keep in mind that even call metadata, door opening, etc, are typically [PII](https://en.wikipedia.org/wiki/Personal_data).
 
 ## Hardware
 
