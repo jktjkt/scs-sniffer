@@ -43,3 +43,11 @@ Here are the SMD removals and replacements:
 ...and here is one tiny wire at the bottom:
 
 ![Bottom side: terminal and Grove wiring](docs/board-bottom.jpg)
+
+Then, connect the positive end of the SCS bus to terminal A or B, and the negative terminal to GND/shield.
+
+## Credits
+
+This project was born out of frustration when a five-year-old building is already half-obsolete in 2026.
+The actual SCS bus reverse engineering was done by many people, but I read mainly [the work of Michael Stapelberg](https://michael.stapelberg.ch/posts/2021-03-13-nuki-scs-series-overview/).
+HW ideas and the RS-485 repurposing are mine, and the actual implementation was tremendously accelerated via use of Claude.
