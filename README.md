@@ -20,6 +20,30 @@ Everything is in [`sw/`](sw/):
   Every frame is logged (e.g., `A8 91 03 60 08 FA A3: ring flat 03`) and handed to an example lambda, as raw hex and as text; malformed captures, stray bytes and glitches are logged with the raw capture.
 - [`scs-tap-poe-p4.yaml`](sw/scs-tap-poe-p4.yaml): a minimal complete device config for the U213 that includes the snippet.
 
+### Reading the diagnostic log
+
+A capture that did not decode cleanly is logged like this:
+
+```
+[W][scs:111]: capture: 0 frames, 0 errors [], 1 stray bytes, 1 glitches, 6 durations
+[W][scs:114]: bytes: FE
+[W][scs:089]: raw[0]: 13 -95 8 -995 5 -2000
+```
+
+- `capture:` counts what the decoder made of one capture: complete frames, errors (by name), bytes outside a frame (`A5` acknowledgements excluded), and glitches (pulses shorter than 8 µs, ignored).
+- `bytes:` every byte decoded from the capture, in order, whether or not it ended up in a frame.
+  A byte whose dips were missed reads as `1` bits, so a lone start bit decodes as `FF`.
+- `raw[n]:` the capture as ESPHome's `remote_receiver` delivers it, 24 values per line, `n` being the index of the first one.
+  Each value is the duration of one level in µs, and the levels alternate:
+  positive = mark = the bus dipped (the tap's output was low), negative = space = the bus was idle.
+  These are durations, not timestamps; a pulse starts at the sum of all values before it.
+  A capture starts with the first mark and ends with the idle that closed it, which is reported as the `idle:` setting (`-2000`).
+  The resolution is 1 µs; the RMT drops pulses shorter than `filter:` (2 µs) before they get here.
+
+In the example, the start bit is a 13 µs pulse, the next pulse starts 108 µs (13 + 95) later, i.e., in bit 0, and the third starts 1111 µs in, after the stop bit; it is only 5 µs long and counts as a glitch.
+On a healthy tap, every pulse is about 30–34 µs long and starts close to a multiple of 104 µs (one bit at 9600 Bd) from the first.
+The raw values can be pasted into a test and replayed with `feed_marks_spaces()`.
+
 ## Hardware
 
 It looks like this is a job for F454, which has been EOL-ed by Legrand, so we have to build some simple bus sniffer.
