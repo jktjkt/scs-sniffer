@@ -1,0 +1,26 @@
+# Example device config: SCS tap on the M5Stack Unit PoE-P4 (U213).
+# The U213 has pre-rev-3 ESP32-P4 silicon, hence engineering_sample.
+
+esphome:
+  name: scs-tap
+
+esp32:
+  board: esp32-p4
+  engineering_sample: true
+
+ethernet:
+  type: IP101
+  mdc_pin: GPIO31
+  mdio_pin: GPIO52
+  clk:
+    mode: CLK_EXT_IN
+    pin: GPIO50
+  phy_addr: 1
+  power_pin: GPIO51
+
+logger:
+
+api:
+
+packages:
+  scs_tap: !include scs-tap.yaml
