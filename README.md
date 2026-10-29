@@ -59,7 +59,7 @@ Here are the SMD removals and replacements:
 
 ![Bottom side: terminal and Grove wiring](docs/board-bottom.jpg)
 
-Then, connect the positive end of the SCS bus to terminal A or B, and the negative terminal to GND/shield.
+Then, connect the **SCS +** wire to terminal A or B, and the **SCS -** wire to terminal G.
 
 ## Credits
 
