@@ -81,13 +81,13 @@ add('<g id="scs-onboard-v2" font-family="Helvetica, Arial, sans-serif">')
 
 # ---------------- marks on the original sheet ----------------
 redx(327.6, 117.5); tag(318, 117.5, 1, R)                                   # R10
-tag(318, 82, 2, G)                                                          # R8
-rlabel(500, 176, 3, "F2 → R101 33k SMM0204", (507, 153.5, 535, 161), M)
+redx(327.6, 82); tag(318, 82, 2, R)                                        # R8
+rlabel(500, 176, 3, "F2 → R101 33k MMA0204", (507, 153.5, 535, 161), M)
 redx(521, 157.4, 3); redx(521, 99.3, 3); redx(445, 123.4, 3); redx(500.7, 112, 3.2); redx(500.7, 142.5, 3.2)  # original parts: DNP
-rlabel(505, 70, 4, "F1 → R103 36k SMM0204", (507, 95.5, 535, 103), M)
+rlabel(505, 70, 4, "F1 → R103 33k MMA0204", (507, 95.5, 535, 103), M)
 rlabel(395, 70, 5, "R6 → 0 Ω (SHIELD = GND)", (430, 120, 460, 127), M)               # R6
 redx(521, 122, 3.2); redx(521, 134, 3.2); tag(578, 127, 6, R)               # GDT1/2
-rlabel(450, 80, 8, "TSS1 → C102 10µ", (496.5, 101, 505, 124), M)          # TSS1
+rlabel(450, 80, 8, "TSS1 → C102 + R104", (496.5, 101, 505, 124), M)          # TSS1
 rlabel(420, 176, 7, "TSS3 → R102 + C101", (496.5, 128, 505, 156), M)       # TSS3
 text(697, 94.6, "→ ESP32 RX", 4.4, G, bold=True); tag(728, 93, 11, G)
 text(697, 101.8, "high or open", 4.4, R, bold=True); tag(728, 100.2, 10, R)
@@ -108,26 +108,26 @@ text(66, 405, "A–B linked", 4.2, B, bold=True); text(66, 410.5, "on PCB (12)",
 # A
 res_h(112, 170, 370, "R101 33k", "F2 position", M)
 wire((170, 370), (330, 370), c=G); dot(200, 370); dot(240, 370); dot(285, 370); dot(330, 370)
-shunt(200, 370, 420, "r", "R102", "4.7k", M)
+shunt(200, 370, 420, "r", "R102", "5.62k", M)
 shunt(240, 370, 420, "c", "C101", "2.2n C0G/X7R", M)
 shunt(285, 370, 420, "d", "DZ2", "5V", G)
 wire((200, 420), (305, 420), c=G); dot(240, 420); dot(285, 420)
 text(198, 433, "R102, C101 stacked on TSS3 pads", 4.2, M)
 wire((330, 370), (395, 370), c=G); text(398, 371.6, "U1-12 (A)", 4.6, G, bold=True)
 # B
-res_h(112, 170, 450, "R103 36k", "F1 position", M)
+res_h(112, 170, 450, "R103 33k", "F1 position", M)
 wire((170, 450), (330, 450), c=G); dot(200, 450); dot(240, 450); dot(285, 450); dot(330, 450)
-shunt(200, 450, 500, "r", "R8", "4.7k", G)
+shunt(200, 450, 500, "r", "R104", "5.49k", M)
 shunt(240, 450, 500, "c", "C102", "10µ X5R/X7R", M)
 shunt(285, 450, 500, "d", "DZ1", "5V", G)
 wire((200, 500), (305, 500), c=G); dot(240, 500); dot(285, 500)
-text(198, 513, "C102 on TSS1 pads", 4.2, M)
+text(198, 513, "C102, R104 stacked on TSS1 pads", 4.2, M)
 wire((330, 450), (395, 450), c=G); text(398, 451.6, "U1-13 (B)", 4.6, G, bold=True)
 shunt(330, 370, 450, "d", "TSS2", "A–B", G)
 add(f'<path d="M305,420 V447 A3,3 0 0 1 305,453 V530" fill="none" stroke="{G}" stroke-width="0.8"/>')
 dot(305, 500); wire((64, 530), (150, 530), c="#111"); res_h(150, 208, 530, "R6 0 Ω", "", M); wire((208, 530), (305, 530), c=G); dot(305, 530); gnd(305, 530)
 text(80, 526, "JP1-1 G = SHIELD", 4.2, "#111", bold=True); text(235, 526, "GND", 4.6, G, bold=True)
-text(47, 548, "A = 0.125·Vbus (τ 9 µs), B = 0.1155·Vbus (τ 42 ms). Idle A−B +0.25 V, 6 V dip −0.49 V. Bus load 1.5 mA, max 1.8 mA.", 4.2, "#333")
+text(47, 548, "A = 0.1455·Vbus (τ 11 µs), B = 0.1426·Vbus (τ 47 ms). At 27 V: idle A−B +0.08 V, 3 V dip −0.33 V. Bus load 1.4 mA, max 1.8 mA.", 4.2, "#333")
 
 # ---------------- host side ----------------
 add('<rect x="445" y="310" width="365" height="80" rx="3" fill="#f7fff9" stroke="#0a8f3c" stroke-width="1"/>')
@@ -147,13 +147,13 @@ add('<rect x="445" y="398" width="365" height="152" rx="3" fill="#fff6f6" stroke
 text(452, 409, "Modifications", 6.2, R, bold=True)
 changes = [
     (1, R, "R10: remove."),
-    (2, G, "R8 4.7k: keep (divider B, bottom). If it comes off: 4.7k 1 % 1206 stacked on C102."),
-    (3, M, "F2 → R101 33k 1 %: SMM02040C3302FB300 MiniMELF (≈2 kV 1.2/50 µs) or 1206 (no surge rating)."),
-    (4, M, "F1 → R103 36k 1 %: SMM02040C3602FB300 MiniMELF (≈2 kV 1.2/50 µs) or 1206 (no surge rating)."),
+    (2, R, "R8: remove. R104 on the TSS1 pads replaces it (bottom of divider B)."),
+    (3, M, "F2 → R101 33k 0.1 %: Vishay MMA02040D3302BB300 MiniMELF (2 kV 1.2/50 µs)."),
+    (4, M, "F1 → R103 33k 0.1 %: the same part. A 0.1 % 1206 works too, with a lower surge rating."),
     (5, M, "R6 → 0 Ω. SHIELD = iso GND; terminal G = SCS BUS −."),
     (6, R, "GDT1, GDT2: remove. Once fired, a GDT across the 27 V bus supply would keep conducting."),
-    (7, M, "TSS3 → R102 4.7k 1 % 1206, C101 2.2 nF C0G/X7R 1206 stacked on it."),
-    (8, M, "TSS1 → C102 10 µF ≥16 V X5R/X7R 1206."),
+    (7, M, "TSS3 → R102 5.62k 0.1 % 1206 (TNPW12065K62BEEA), C101 2.2 nF C0G/X7R 1206 stacked on it."),
+    (8, M, "TSS1 → C102 10 µF ≥16 V X5R/X7R 1206, R104 5.49k 0.1 % 1206 (ERA-8AEB5491V) stacked on it."),
     (9, R, "R13 (100k, Q1 gate to GND): remove. If kept, IO1 must be driven high: open, it floats at ~1.65 V."),
     (10, R, "Grove IO1 (UART_Rx): keep at logic high or leave floating."),
     (11, G, "Grove IO2 (UART_Tx) → ESP32 RX, MCU pull-up enabled."),

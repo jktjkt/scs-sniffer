@@ -54,12 +54,12 @@ SCS is a 27 V DC bus that carries power and data on the same two wires.
 Data is UART-like (9600 Bd, 8N1), but a `0` bit is only a ~6 V dip lasting 34 µs at the start of the 104 µs bit cell; idle and `1` bits leave the bus alone.
 The RS-485 receiver is just a differential comparator, so we feed its A/B inputs from two voltage dividers with slightly different ratios, one lightly filtered and one heavily filtered:
 
-- `A` follows the bus quickly (33k/4.7k, τ ≈ 9 µs),
-- `B` sits at a slightly lower ratio (36k/4.7k) behind a 10 µF capacitor, i.e., it tracks the average bus voltage over ~40 ms.
+- `A` follows the bus quickly (33k/5.62k, τ ≈ 11 µs),
+- `B` sits at a slightly lower ratio (33k/5.49k) behind a 10 µF capacitor, i.e., it tracks the average bus voltage over ~50 ms.
 
-At idle, `A` is ~0.25 V above `B` and the receiver outputs high.
-During a dip, `A` drops ~0.5 V below `B` and the output goes low.
-The transceiver's isolation barrier and its isolated DC/DC converter keep the MCU galvanically separate from the bus, and the 33k/36k series resistors limit the load to ~1.5 mA, so the tap cannot disturb the bus even if the RS-485 driver gets enabled.
+At idle, `A` is ~0.08 V above `B` and the receiver outputs high.
+During a dip (3–6 V on the bus), `A` drops 0.3–0.75 V below `B` and the output goes low.
+The transceiver's isolation barrier and its isolated DC/DC converter keep the MCU galvanically separate from the bus, and the 33k series resistors limit the load to ~1.4 mA, so the tap cannot disturb the bus even if the RS-485 driver gets enabled.
 The MCU receives the raw 34 µs pulses on the Grove port and decodes them with the ESP32's RMT peripheral.
 Polarity matters: SCS bus + goes to terminal A (linked to B), bus − to G.
 A reversed connection damages nothing, but the tap receives nothing either.
@@ -67,9 +67,9 @@ A reversed connection damages nothing, but the tap receives nothing either.
 The actual hardware modification is reasonably straightforward; the trickiest part is removing a few rather tiny 0402 resistors.
 Also remove a few other, hand-soldering-friendly components, and place a bunch of 1206 SMD parts, which is a piece of cake:
 
-- one 4k7 1% 1206 resistor (plus another one if R8 comes off by accident)
-- one 33kΩ 1% MiniMELF resistor (SMM02040C3302FB300, or just a regular 1206 resistor if you do not care about surges)
-- one 36kΩ 1% MiniMELF resistor (SMM02040C3602FB300, see above for alternatives)
+- two 33kΩ 0.1% MiniMELF resistors (Vishay MMA02040D3302BB300; a 0.1% 1206 resistor works too, with a lower surge rating)
+- one 5.62kΩ 0.1% 1206 resistor (Vishay TNPW12065K62BEEA)
+- one 5.49kΩ 0.1% 1206 resistor (Panasonic ERA-8AEB5491V)
 - one 0Ω 1206 jumper
 - one 10µF ≥16V X5R/X7R 1206 capacitor
 - one 2.2nF C0G/X7R 1206 capacitor

@@ -54,21 +54,21 @@ box(1483, 423, 1622, 632, "red"); cross(1495, 435, 1610, 620)   # GDT1
 box(1483, 658, 1622, 862, "red"); cross(1495, 670, 1610, 850)   # GDT2
 box(1388, 418, 1487, 632, "mag")                     # TSS1
 box(1393, 658, 1487, 872, "mag")                     # TSS3
-box(1133, 822, 1160, 866, "grn")                     # R8
+box(1133, 822, 1160, 866, "red"); cross(1137, 826, 1156, 862)   # R8
 box(1129, 891, 1164, 946, "red"); cross(1133, 895, 1160, 942)   # R10
 box(1638, 383, 2010, 975, "cyan")                    # terminal
 
-label(1471, 358, 1128, 112, ["F1 (B) → R103 36 k 1 %", "Vishay SMM02040C3602FB300", "(plain 1206: lower surge rating)"], "mag", w=465)
+label(1471, 358, 1128, 112, ["F1 (B) → R103 33 k 0.1 %", "Vishay MMA02040D3302BB300", "MiniMELF, 2 kV 1.2/50 µs"], "mag", w=465)
 label(1272, 372, 700, 112, ["R6 → 0 Ω, 1206", "SHIELD = GND, G = SCS BUS −"], "mag", w=420)
-label(1437, 470, 1605, 112, ["TSS1 (B) → C102", "10 µF ≥16 V X5R/X7R 1206"], "mag", w=400)
+label(1437, 470, 1605, 112, ["TSS1 (B) → C102 + R104", "C102: 10 µF X5R/X7R 1206", "R104: 5.49 k 0.1 % 1206, on top"], "mag", w=410)
 label(1552, 527, 1640, 230, ["GDT1, GDT2: remove"], "red", w=368)
 leader(1552, 760, 1700, 275, "red")
-label(1440, 840, 1555, 990, ["TSS3 (A) → R102 + C101", "R102: 4.7 k 1 % 1206", "C101: 2.2 nF C0G/X7R 1206, on top"], "mag", w=440)
-label(1493, 952, 1540, 1122, ["F2 (A) → R101 33 k 1 %", "Vishay SMM02040C3302FB300", "(plain 1206: lower surge rating)"], "mag", w=470)
+label(1440, 840, 1555, 990, ["TSS3 (A) → R102 + C101", "R102: 5.62 k 0.1 % 1206", "C101: 2.2 nF C0G/X7R 1206, on top"], "mag", w=440)
+label(1493, 952, 1540, 1122, ["F2 (A) → R101 33 k 0.1 %", "Vishay MMA02040D3302BB300", "MiniMELF, 2 kV 1.2/50 µs"], "mag", w=470)
 label(1146, 918, 690, 1250, ["R10: remove"], "red", w=360)
-add(f'<polyline points="1160,844 1215,844 1215,1250" fill="none" stroke="{COL["grn"]}" stroke-width="3"/>')
-add(f'<circle cx="1160" cy="844" r="6" fill="{COL["grn"]}"/>')
-label(None, None, 1170, 1250, ["R8 4.7 k: keep (divider B)", "if it comes off: 4.7 k 1 % 1206", "stacked on C102 (TSS1 pads)"], "grn", w=420)
+add(f'<polyline points="1160,844 1215,844 1215,1250" fill="none" stroke="{COL["red"]}" stroke-width="3"/>')
+add(f'<circle cx="1160" cy="844" r="6" fill="{COL["red"]}"/>')
+label(None, None, 1170, 1250, ["R8: remove", "R104 on the TSS1 pads replaces it"], "red", w=470)
 box(633, 870, 657, 924, "red"); cross(637, 874, 653, 920)
 label(645, 924, 620, 1310, ["R13: remove", "if kept, MCU must drive IO1 high"], "red", w=430)
 
