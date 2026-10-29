@@ -20,7 +20,5 @@ ethernet:
 
 logger:
 
-api:
-
 packages:
   scs_tap: !include scs-tap.yaml
