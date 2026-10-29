@@ -11,6 +11,8 @@
 #pragma once
 
 #include <array>
+#include <cinttypes>
+#include <cstdint>
 #include <cstdio>
 #include <functional>
 #include <string>
@@ -74,18 +76,21 @@ struct Sink {
   }
 };
 
-inline void dump_raw(const std::vector<int> &raw) {
+// ESPHome's RawTimings. int32_t is long, not int, on ESP-IDF 5+ (both Xtensa and RISC-V).
+using RawTimings = std::vector<int32_t>;
+
+inline void dump_raw(const RawTimings &raw) {
   static const std::size_t PER_LINE = 24;  // "-32767" at most: fits the line buffer
   char line[256];
   for (std::size_t i = 0; i < raw.size(); i += PER_LINE) {
     int len = std::snprintf(line, sizeof line, "raw[%u]:", static_cast<unsigned>(i));
     for (std::size_t j = i; j < raw.size() && j < i + PER_LINE; ++j)
-      len += std::snprintf(line + len, sizeof line - len, " %d", raw[j]);
+      len += std::snprintf(line + len, sizeof line - len, " %" PRId32, raw[j]);
     ESP_LOGW(TAG, "%s", line);
   }
 }
 
-inline void feed(const std::vector<int> &raw, Sink::FrameCallback on_frame) {
+inline void feed(const RawTimings &raw, Sink::FrameCallback on_frame) {
   static scs::Decoder<Sink> decoder;
   Sink &s = decoder.sink();
   s.on_frame_cb = std::move(on_frame);

@@ -153,7 +153,7 @@ class Decoder {
   }
 
   // Signed durations in microseconds, positive = active pulse ("mark"), negative = idle ("space"),
-  // the format of ESPHome's remote_receiver raw data (std::vector<int>; int32_t is long on ESP-IDF).
+  // the format of ESPHome's remote_receiver raw data (std::vector<int32_t>; int32_t is long on ESP-IDF).
   template <class Int>
   constexpr void feed_marks_spaces(const Int *durations_us, std::size_t count, bool last = true) {
     for (std::size_t i = 0; i < count; ++i) {
