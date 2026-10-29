@@ -78,7 +78,7 @@ struct Tx {
   uint32_t jitter_ns = 0;    // each edge moved by a pseudo-random amount in [-j, +j]
   uint32_t seed = 1;
   uint32_t byte_gap_ns = 0;  // extra idle between bytes
-  uint32_t glitch_ns = 0;    // if set, a glitch of this width follows every pulse
+  uint32_t glitch_ns = 0;    // if set, a glitch of this width starts 75 us after every pulse
   uint32_t rise_ns = 0;      // every low (glitches too) lasts this much longer, see pullup_delay()
 };
 
@@ -103,7 +103,7 @@ struct Encoder {
   constexpr void pulse(uint64_t start, uint64_t width) {
     sig.pulse(start, width + tx.rise_ns);
     if (tx.glitch_ns)
-      sig.pulse(start + 60'000, tx.glitch_ns + tx.rise_ns);
+      sig.pulse(start + 75'000, tx.glitch_ns + tx.rise_ns);
   }
   // Active pulses at the given bit cells of one character (0 = start bit, 9 = stop bit).
   constexpr void cells(std::initializer_list<int> zero_cells) {
@@ -394,6 +394,51 @@ constexpr Result kChopped = [] {
 }();
 static_assert(kChopped.rec.frames.count == 2 && kChopped.rec.errors.count == 0);
 static_assert(kChopped.glitches == 0);
+
+// Broken-up pulses: every 34 us pulse of kF1 replaced by `shape` (alternating low/high, in us).
+// Chatter around the threshold and ringing must decode as clean pulses, without glitches.
+template <std::size_t S>
+constexpr Result decode_shaped(const std::array<uint32_t, S> &shape_us) {
+  scs::Decoder<Rec> d{};
+  d.segment(false, 1'000'000);
+  for (uint8_t b : kF1)
+    for (int i = 0; i < 10; ++i) {
+      uint32_t used = 0;
+      if (i == 0 || (i <= 8 && !((b >> (i - 1)) & 1)))
+        for (std::size_t k = 0; k < S; ++k) {
+          d.segment(k % 2 == 0, shape_us[k] * 1000);
+          used += shape_us[k] * 1000;
+        }
+      d.segment(false, 104'167 - used);
+    }
+  d.end_of_capture();
+  return {d.sink(), d.glitches()};
+}
+constexpr bool clean(const Result &r) {
+  return r.rec.frames.count == 1 && same(r.rec.frames[0], kF1) && r.rec.errors.count == 0 && r.glitches == 0;
+}
+static_assert(clean(decode_shaped(std::array<uint32_t, 3>{3, 1, 30})));    // chatter on the falling edge
+static_assert(clean(decode_shaped(std::array<uint32_t, 3>{30, 1, 3})));    // chatter on the rising edge
+static_assert(clean(decode_shaped(std::array<uint32_t, 3>{16, 2, 16})));   // split in the middle
+static_assert(clean(decode_shaped(std::array<uint32_t, 3>{30, 15, 9})));   // ringing: second low 45 us in
+static_assert(clean(decode_shaped(std::array<uint32_t, 5>{2, 1, 28, 20, 6})));
+
+// A bouncing pulse in the stop bit is still a stop-bit error: the byte must not be closed (at 9.5
+// bit times) before the bounce has been put back together.
+constexpr Result kStopBitBounce = [] {
+  scs::Decoder<Rec> d{};
+  d.segment(false, 1'000'000);
+  d.segment(true, 34'000);                // start bit
+  d.segment(false, 9 * 104'167 - 34'000);  // data bits all 1
+  d.segment(true, 34'000);                // pulse in the stop bit...
+  d.segment(false, 20'000);               // ...that bounces past 9.5 bit times
+  d.segment(true, 5'000);
+  d.segment(false, 2'000'000);
+  d.end_of_capture();
+  return Result{d.sink(), d.glitches()};
+}();
+static_assert(kStopBitBounce.rec.errors.count == 1 && kStopBitBounce.rec.errors[0] == Error::StopBit);
+static_assert(kStopBitBounce.rec.bytes.count == 0);
 
 // Bad checksum.
 constexpr Result kBadChecksum = [] {

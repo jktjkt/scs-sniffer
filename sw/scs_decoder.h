@@ -12,7 +12,8 @@
 //   A lone A5 outside a frame is an acknowledgement and arrives as a stray byte.
 //
 // Only the falling edge (start) of each pulse carries timing; its width is only used to reject
-// glitches and stuck-low lines. Bits are placed by rounding the edge offset from the start bit to the
+// glitches and stuck-low lines. A pulse that breaks up (ringing, chatter around the threshold) is
+// put back together: lows separated by less than merge_gap_ns count as one pulse. Bits are placed by rounding the edge offset from the start bit to the
 // nearest bit cell, so sender clock error of a few percent is tolerated (see Timing::phase_tol_ns).
 //
 // Enable the MCU pull-up on the RX pin: the tap pulls low hard but releases through 100 k only, and the
@@ -46,6 +47,7 @@ struct Timing {
   uint32_t max_low_ns = 80'000;         // nominal 34 us; longer is not an SCS bit
   uint32_t phase_tol_ns = 36'000;       // max distance of an edge from its bit cell start
   uint32_t frame_gap_ns = 1'500'000;    // idle after a byte that abandons an unterminated frame
+  uint32_t merge_gap_ns = 25'000;       // shorter highs inside a pulse are bounces; real gaps are >= 56 us
 };
 
 enum class Error : uint8_t {
@@ -108,17 +110,28 @@ class Decoder {
     if (active) {
       if (!in_low_) {
         in_low_ = true;
-        low_start_ = now_;
+        if (pending_ && now_ - pending_end_ < t_.merge_gap_ns) {
+          low_start_ = pending_start_;  // a bounce: continue the previous pulse
+          pending_ = false;
+        } else {
+          flush_pending_();
+          low_start_ = now_;
+        }
       }
       now_ += ns;
       return;
     }
     if (in_low_) {
       in_low_ = false;
-      pulse_(low_start_, now_ - low_start_);
+      pending_ = true;
+      pending_start_ = low_start_;
+      pending_end_ = now_;
     }
     now_ += ns;
-    advance_(now_);
+    if (pending_ && now_ - pending_end_ >= t_.merge_gap_ns)
+      flush_pending_();
+    if (!pending_)  // a pending pulse is older than now_; it must be seen first
+      advance_(now_);
   }
 
   // The capture ended after a long idle (RMT idle threshold, ESPHome `idle:`). Time does not continue
@@ -126,8 +139,11 @@ class Decoder {
   constexpr void end_of_capture() {
     if (in_low_) {
       in_low_ = false;
-      pulse_(low_start_, now_ - low_start_);
+      pending_ = true;
+      pending_start_ = low_start_;
+      pending_end_ = now_;
     }
+    flush_pending_();
     if (in_byte_)
       finish_byte_();
     if (frame_.size != 0) {
@@ -168,6 +184,13 @@ class Decoder {
   }
 
  private:
+  constexpr void flush_pending_() {
+    if (!pending_)
+      return;
+    pending_ = false;
+    pulse_(pending_start_, pending_end_ - pending_start_);
+  }
+
   constexpr bool rmt_half_(uint32_t duration, uint32_t level, uint32_t tick_ns, uint32_t active_level) {
     if (duration == 0) {
       end_of_capture();
@@ -278,6 +301,9 @@ class Decoder {
   Timing t_;
   uint64_t now_ = 0;
   bool in_low_ = false;
+  bool pending_ = false;  // a pulse that ended less than merge_gap_ns ago
+  uint64_t pending_start_ = 0;
+  uint64_t pending_end_ = 0;
   uint64_t low_start_ = 0;
   bool in_byte_ = false;
   uint64_t byte_start_ = 0;
