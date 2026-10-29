@@ -29,9 +29,8 @@ remote_receiver:
       pullup: true  # on-board pull-up R11 is only 100 k
   filter: 2us  # the decoder rejects glitches < 8 us itself
   idle: 2ms  # longest gap inside a frame is ~0.8 ms
-  use_dma: true
-  rmt_symbols: 512
-  receive_symbols: 512
+  rmt_symbols: 192  # no DMA: ESP-IDF needs a cache-aligned buffer on the P4, which ESPHome does not allocate
+  receive_symbols: 512  # the RX memory is refilled in ping-pong halves
   on_raw:
     then:
       - lambda: |-
