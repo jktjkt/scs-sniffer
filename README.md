@@ -51,7 +51,8 @@ I was lazy, so I decided to reuse some existing isolated RS-485 converter (even 
 This project adapts the M5Stack's RS485-ISO ([`U094`](https://docs.m5stack.com/en/unit/Unit_RS485-ISO)) for passive SCS sniffing.
 
 SCS is a 27 V DC bus that carries power and data on the same two wires.
-Data is UART-like (9600 Bd, 8N1), but a `0` bit is only a ~6 V dip lasting 34 µs at the start of the 104 µs bit cell; idle and `1` bits leave the bus alone.
+Data is UART-like (9600 Bd, 8N1), but a `0` bit is only a short dip in the bus voltage, lasting 34 µs at the start of the 104 µs bit cell; idle and `1` bits leave the bus alone.
+How deep the dip is depends on the installation: published measurements range from ~3 V (27 V → 24 V) to ~6 V (28 V → 22 V); judging by the first captures, our building is at the shallow end.
 The RS-485 receiver is just a differential comparator, so we feed its A/B inputs from two voltage dividers with slightly different ratios, one lightly filtered and one heavily filtered:
 
 - `A` follows the bus quickly (33k/5.62k, τ ≈ 11 µs),
@@ -63,6 +64,26 @@ The transceiver's isolation barrier and its isolated DC/DC converter keep the MC
 The MCU receives the raw 34 µs pulses on the Grove port and decodes them with the ESP32's RMT peripheral.
 Polarity matters: SCS bus + goes to terminal A (linked to B), bus − to G.
 A reversed connection damages nothing, but the tap receives nothing either.
+
+### Thresholds and noise immunity
+
+The receiver only looks at `A`−`B` and switches low below −140 mV and back high above −110 mV (typical; guaranteed at −200 mV and −50 mV).
+Its thresholds are negative by design, so the small positive idle offset reliably reads as high.
+Computed for 18–28 V, −20…+70 °C, 0.1 % resistors and the receiver's datasheet limits:
+
+| | typical | worst case |
+|---|---|---|
+| smallest bus dip that is detected | ~1.6 V | 2.6 V |
+| bus disturbance (e.g., audio) that falsely reads as a dip | ~1.5 V | ~0.5 V |
+
+- Fast spikes and video are attenuated by `A`'s low-pass (τ ≈ 11 µs); what still gets through is shorter than 8 µs and dropped by the decoder.
+- Slow changes of the bus voltage (load changes, supply sag) move `A` and `B` together and cancel out.
+- Audio (300 Hz–4 kHz) is not filtered and reaches the receiver at full strength; it is harmless as long as its peaks on the bus stay below the second row of the table.
+  We have not measured the audio level on the bus yet.
+- The decoder rejects anything that does not look like a 34 µs pulse on the 104 µs bit grid, and a frame also needs the right length, `A8`…`A3` and a valid checksum, so noise produces warnings in the log rather than false events.
+
+The idle offset is the trade-off: a larger one tolerates more noise but needs deeper dips, a smaller one the opposite.
+The values above aim at ~3 V buses with moderate audio.
 
 The actual hardware modification is reasonably straightforward; the trickiest part is removing a few rather tiny 0402 resistors.
 Also remove a few other, hand-soldering-friendly components, and place a bunch of 1206 SMD parts, which is a piece of cake:
