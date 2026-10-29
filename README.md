@@ -66,10 +66,10 @@ Then, connect the positive end of the SCS bus to terminal A or B, and the negati
 This project was born out of frustration when a five-year-old building is already half-obsolete in 2026.
 HW ideas and the RS-485 repurposing are mine, and the actual implementation was tremendously accelerated via use of Claude.
 
-The actual SCS bus reverse engineering was done by many people, but I read mainly [the work of Michael Stapelberg](https://michael.stapelberg.ch/posts/2021-03-13-nuki-scs-series-overview/).
+The actual SCS bus reverse engineering was done by many people.
 Notable mentions:
 
-- Michael Stapelberg: [SCS signal decoding](https://michael.stapelberg.ch/posts/2020-09-28-nuki-scs-bticino-decoding/), [processing SCS with a microcontroller](https://michael.stapelberg.ch/posts/2020-11-30-scs-processing-microcontroller/) (bus levels: 28 V idle, 22 V low), [smart intercom backpack](https://michael.stapelberg.ch/posts/2021-03-13-smart-intercom-backpack/) and [intercom-backpack](https://github.com/stapelberg/intercom-backpack) (ring frames)
+- Michael Stapelberg: [intro](https://michael.stapelberg.ch/posts/2021-03-13-nuki-scs-series-overview/), [SCS signal decoding](https://michael.stapelberg.ch/posts/2020-09-28-nuki-scs-bticino-decoding/), [processing SCS with a microcontroller](https://michael.stapelberg.ch/posts/2020-11-30-scs-processing-microcontroller/) (bus levels: 28 V idle, 22 V low), [smart intercom backpack](https://michael.stapelberg.ch/posts/2021-03-13-smart-intercom-backpack/) and [intercom-backpack](https://github.com/stapelberg/intercom-backpack) (ring frames)
 - [Bus SCS on Italian Wikipedia](https://it.wikipedia.org/wiki/Bus_SCS) (bit timing and checksum; its framing description is inaccurate)
 - Guido Pagani: [SCS bus log](https://guidopic.altervista.org/eibscout/logticino.html) and [EIB/SCS gateway](http://guidopic.altervista.org/alter/eibscsgt.html) (commands, states, acknowledgements)
 - [flavio/scsgate](https://github.com/flavio/scsgate/blob/master/scsgate/messages.py) (message types)
