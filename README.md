@@ -60,6 +60,8 @@ Here are the SMD removals and replacements:
 
 ![Bottom side: terminal and Grove wiring](docs/board-bottom.jpg)
 
+The original photos, the SVG overlays and the scripts that draw them are in [`docs/src/`](docs/src/); `make -C docs/src` rebuilds these pictures.
+
 Then, connect the **SCS +** wire to terminal A or B, and the **SCS -** wire to terminal G.
 
 ## Credits

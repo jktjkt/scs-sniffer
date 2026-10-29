@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="2016" height="1512" viewBox="0 0 2016 1512" font-family="Helvetica, Arial, sans-serif">
+<image href="photo-bottom.jpg" x="0" y="0" width="1512" height="2016" transform="translate(2016,0) rotate(90)"/>
+<rect x="10" y="12" width="1010" height="56" rx="8" fill="rgba(0,0,0,0.82)"/>
+<text x="24" y="52" font-size="34" font-weight="bold" fill="#fff">Unit ISO485 as SCS bus tap: bottom side</text>
+<line x1="1597" y1="690" x2="1597" y2="816" stroke="#4da3ff" stroke-width="16" stroke-linecap="round"/>
+<line x1="1597" y1="444" x2="1597" y2="559" stroke="#4da3ff" stroke-width="16" stroke-linecap="round"/>
+<line x1="1597" y1="559" x2="1507.0" y2="559" stroke="#4da3ff" stroke-width="3"/>
+<circle cx="1597" cy="559" r="7" fill="#4da3ff"/>
+<rect x="966.2800000000001" y="537.0" width="540.7199999999999" height="44" rx="7" fill="rgba(0,0,0,0.82)" stroke="#4da3ff" stroke-width="3"/>
+<text x="978.2800000000001" y="568" font-size="26" fill="#fff">NC: wire link to G (no connection)</text>
+<line x1="1592" y1="444" x2="1502.0" y2="444" stroke="#5ac8fa" stroke-width="3"/>
+<circle cx="1592" cy="444" r="7" fill="#5ac8fa"/>
+<rect x="1277.96" y="422.0" width="224.04" height="44" rx="7" fill="rgba(0,0,0,0.82)" stroke="#5ac8fa" stroke-width="3"/>
+<text x="1289.96" y="453" font-size="26" fill="#fff">G → SCS BUS −</text>
+<line x1="1597" y1="690" x2="1507.0" y2="690" stroke="#5ac8fa" stroke-width="3"/>
+<circle cx="1597" cy="690" r="7" fill="#5ac8fa"/>
+<rect x="1282.96" y="668.0" width="224.04" height="44" rx="7" fill="rgba(0,0,0,0.82)" stroke="#5ac8fa" stroke-width="3"/>
+<text x="1294.96" y="699" font-size="26" fill="#fff">A → SCS BUS +</text>
+<line x1="1597" y1="816" x2="1507.0" y2="816" stroke="#4da3ff" stroke-width="3"/>
+<circle cx="1597" cy="816" r="7" fill="#4da3ff"/>
+<rect x="1222.64" y="794.0" width="284.35999999999996" height="44" rx="7" fill="rgba(0,0,0,0.82)" stroke="#4da3ff" stroke-width="3"/>
+<text x="1234.64" y="825" font-size="26" fill="#fff">B: wire link to A</text>
+<line x1="417" y1="534" x2="507" y2="534" stroke="#34c759" stroke-width="3"/>
+<circle cx="417" cy="534" r="7" fill="#34c759"/>
+<rect x="507" y="512.0" width="389.91999999999996" height="44" rx="7" fill="rgba(0,0,0,0.82)" stroke="#34c759" stroke-width="3"/>
+<text x="519" y="543" font-size="26" fill="#fff">ESP32 RMT RX, pull-up on</text>
+<line x1="417" y1="595" x2="507" y2="595" stroke="#ff3b30" stroke-width="3"/>
+<circle cx="417" cy="595" r="7" fill="#ff3b30"/>
+<rect x="507" y="573.0" width="269.28" height="44" rx="7" fill="rgba(0,0,0,0.82)" stroke="#ff3b30" stroke-width="3"/>
+<text x="519" y="604" font-size="26" fill="#fff">high or floating</text>
+<line x1="417" y1="660" x2="507" y2="660" stroke="#5ac8fa" stroke-width="3"/>
+<circle cx="417" cy="660" r="7" fill="#5ac8fa"/>
+<rect x="507" y="638.0" width="133.56" height="44" rx="7" fill="rgba(0,0,0,0.82)" stroke="#5ac8fa" stroke-width="3"/>
+<text x="519" y="669" font-size="26" fill="#fff">5 → 5 V</text>
+<line x1="417" y1="724" x2="507" y2="724" stroke="#5ac8fa" stroke-width="3"/>
+<circle cx="417" cy="724" r="7" fill="#5ac8fa"/>
+<rect x="507" y="702.0" width="133.56" height="44" rx="7" fill="rgba(0,0,0,0.82)" stroke="#5ac8fa" stroke-width="3"/>
+<text x="519" y="733" font-size="26" fill="#fff">G → GND</text>
+<rect x="200" y="1030" width="1616" height="190" rx="10" fill="rgba(0,0,0,0.82)" stroke="#ff3b30" stroke-width="3"/>
+<text x="224" y="1078" font-size="28" font-weight="bold" fill="#ff3b30">UART_Rx (R↑T)</text>
+<text x="224" y="1120" font-size="28" font-weight="normal" fill="#fff">Open at the MCU (R13 removed) or high: RS-485 driver off, receiver on, SCS data on UART_Tx.</text>
+<text x="224" y="1162" font-size="28" font-weight="normal" fill="#fff">Low: the tap stops receiving; the driver pushes at most 0.1 mA into the SCS bus (a few mV).</text>
+<text x="224" y="1204" font-size="28" font-weight="normal" fill="#fff">With R13 still fitted, an open UART_Rx floats at ~1.65 V and the tap is unreliable: drive it high.</text>
+</svg>
