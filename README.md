@@ -91,7 +91,7 @@ Also remove a few other, hand-soldering-friendly components, and place a bunch o
 - two 33kΩ 0.1% MiniMELF resistors (Vishay MMA02040D3302BB300; a 0.1% 1206 resistor works too, with a lower surge rating)
 - one 5.62kΩ 0.1% 1206 resistor (Vishay TNPW12065K62BEEA)
 - one 5.49kΩ 0.1% 1206 resistor (Panasonic ERA-8AEB5491V)
-- one 0Ω 1206 jumper
+- one 0Ω 0805 jumper
 - one 10µF ≥16V X5R/X7R 1206 capacitor
 - one 2.2nF C0G/X7R 1206 capacitor
 

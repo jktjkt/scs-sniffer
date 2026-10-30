@@ -59,7 +59,7 @@ box(1129, 891, 1164, 946, "red"); cross(1133, 895, 1160, 942)   # R10
 box(1638, 383, 2010, 975, "cyan")                    # terminal
 
 label(1471, 358, 1128, 112, ["F1 (B) → R103 33 k 0.1 %", "Vishay MMA02040D3302BB300", "MiniMELF, 2 kV 1.2/50 µs"], "mag", w=465)
-label(1272, 372, 700, 112, ["R6 → 0 Ω, 1206", "SHIELD = GND, G = SCS BUS −"], "mag", w=420)
+label(1272, 372, 700, 112, ["R6 → 0 Ω, 0805", "SHIELD = GND, G = SCS BUS −"], "mag", w=420)
 label(1437, 470, 1605, 112, ["TSS1 (B) → C102 + R104", "C102: 10 µF X5R/X7R 1206", "R104: 5.49 k 0.1 % 1206, on top"], "mag", w=410)
 label(1552, 527, 1640, 230, ["GDT1, GDT2: remove"], "red", w=368)
 leader(1552, 760, 1700, 275, "red")
