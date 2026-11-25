@@ -3602,10 +3602,10 @@
 <circle cx="318" cy="82" r="3.2" fill="#e00000"/>
 <text x="318" y="83.7" font-size="4.4" fill="#fff" text-anchor="middle" font-weight="bold">2</text>
 <line x1="521.0" y1="170.8" x2="521.0" y2="161" stroke="#b0008a" stroke-width="0.5" stroke-dasharray="1.5 1"/>
-<rect x="500" y="170.8" width="65.6" height="7" rx="1" fill="#fffdf6" stroke="#b0008a" stroke-width="0.5"/>
+<rect x="500" y="170.8" width="70.80000000000001" height="7" rx="1" fill="#fffdf6" stroke="#b0008a" stroke-width="0.5"/>
 <circle cx="503.6" cy="174.3" r="3.2" fill="#b0008a"/>
 <text x="503.6" y="176.0" font-size="4.4" fill="#fff" text-anchor="middle" font-weight="bold">3</text>
-<text x="508.2" y="176" font-size="4.4" fill="#b0008a" text-anchor="start" font-weight="bold">F2 → R101 33k MMA0204</text>
+<text x="508.2" y="176" font-size="4.4" fill="#b0008a" text-anchor="start" font-weight="bold">F2 → R101 33.2k SMM0204</text>
 <path d="M518,154.4 L524,160.4 M524,154.4 L518,160.4" stroke="#e00000" stroke-width="1.3"/>
 <path d="M518,96.3 L524,102.3 M524,96.3 L518,102.3" stroke="#e00000" stroke-width="1.3"/>
 <path d="M442,120.4 L448,126.4 M448,120.4 L442,126.4" stroke="#e00000" stroke-width="1.3"/>
@@ -3669,7 +3669,7 @@
 <polyline fill="none" stroke="#b0008a" stroke-width="0.8" stroke-linejoin="round" points="112,370 133.0,370"/>
 <rect x="133.0" y="367.5" width="16" height="5" fill="#fff" stroke="#b0008a" stroke-width="0.8"/>
 <polyline fill="none" stroke="#b0008a" stroke-width="0.8" stroke-linejoin="round" points="149.0,370 170,370"/>
-<text x="141.0" y="366" font-size="4.4" fill="#b0008a" text-anchor="middle" font-weight="bold">R101 33k</text>
+<text x="141.0" y="366" font-size="4.4" fill="#b0008a" text-anchor="middle" font-weight="bold">R101 33.2k</text>
 <text x="141.0" y="378" font-size="4.4" fill="#b0008a" text-anchor="middle">F2 position</text>
 <polyline fill="none" stroke="#0a8f3c" stroke-width="0.8" stroke-linejoin="round" points="170,370 330,370"/>
 <circle cx="200" cy="370" r="1.3" fill="#0a8f3c"/>
@@ -3751,7 +3751,7 @@
 <polyline fill="none" stroke="#0a8f3c" stroke-width="0.8" stroke-linejoin="round" points="303.5,536.2 306.5,536.2"/>
 <text x="80" y="526" font-size="4.2" fill="#111" text-anchor="start" font-weight="bold">JP1-1 G = SHIELD</text>
 <text x="235" y="526" font-size="4.6" fill="#0a8f3c" text-anchor="start" font-weight="bold">GND</text>
-<text x="47" y="548" font-size="4.2" fill="#333" text-anchor="start">A = 0.1455·Vbus (τ 11 µs), B = 0.1426·Vbus (τ 47 ms). At 27 V: idle A−B +0.08 V, 3 V dip −0.33 V. Bus load 1.4 mA, max 1.8 mA.</text>
+<text x="47" y="548" font-size="4.2" fill="#333" text-anchor="start">A = 0.1448·Vbus (τ 11 µs), B = 0.1426·Vbus (τ 47 ms). At 27 V: idle A−B +0.06 V, 3 V dip −0.35 V. Bus load 1.4 mA, max 1.8 mA.</text>
 <rect x="445" y="310" width="365" height="80" rx="3" fill="#f7fff9" stroke="#0a8f3c" stroke-width="1"/>
 <text x="452" y="321" font-size="6.2" fill="#0a8f3c" text-anchor="start" font-weight="bold">Host side (Grove)</text>
 <text x="452" y="333" font-size="4.8" fill="#0a8f3c" text-anchor="start" font-weight="bold">IO2  UART_Tx</text>
@@ -3774,10 +3774,10 @@
 <text x="463" y="429.0" font-size="4.6" fill="#222" text-anchor="start">R8: remove. R104 on the TSS1 pads replaces it (bottom of divider B).</text>
 <circle cx="456" cy="438.4" r="3.2" fill="#b0008a"/>
 <text x="456" y="440.09999999999997" font-size="4.4" fill="#fff" text-anchor="middle" font-weight="bold">3</text>
-<text x="463" y="440.0" font-size="4.6" fill="#222" text-anchor="start">F2 → R101 33k 0.1 %: Vishay MMA02040D3302BB300 MiniMELF (2 kV 1.2/50 µs).</text>
+<text x="463" y="440.0" font-size="4.6" fill="#222" text-anchor="start">F2 → R101 33.2k 0.1 %: Vishay SMM02040D3322BB300 MiniMELF (2 kV 1.2/50 µs).</text>
 <circle cx="456" cy="449.4" r="3.2" fill="#b0008a"/>
 <text x="456" y="451.09999999999997" font-size="4.4" fill="#fff" text-anchor="middle" font-weight="bold">4</text>
-<text x="463" y="451.0" font-size="4.6" fill="#222" text-anchor="start">F1 → R103 33k 0.1 %: the same part. A 0.1 % 1206 works too, with a lower surge rating.</text>
+<text x="463" y="451.0" font-size="4.6" fill="#222" text-anchor="start">F1 → R103 33k 0.1 %: Vishay MMA02040D3302BB300 MiniMELF. 0.1 % 1206 parts work too, with a lower surge rating.</text>
 <circle cx="456" cy="460.4" r="3.2" fill="#b0008a"/>
 <text x="456" y="462.09999999999997" font-size="4.4" fill="#fff" text-anchor="middle" font-weight="bold">5</text>
 <text x="463" y="462.0" font-size="4.6" fill="#222" text-anchor="start">R6 → 0 Ω. SHIELD = iso GND; terminal G = SCS BUS −.</text>
@@ -3786,7 +3786,7 @@
 <text x="463" y="473.0" font-size="4.6" fill="#222" text-anchor="start">GDT1, GDT2: remove. Once fired, a GDT across the 27 V bus supply would keep conducting.</text>
 <circle cx="456" cy="482.4" r="3.2" fill="#b0008a"/>
 <text x="456" y="484.09999999999997" font-size="4.4" fill="#fff" text-anchor="middle" font-weight="bold">7</text>
-<text x="463" y="484.0" font-size="4.6" fill="#222" text-anchor="start">TSS3 → R102 5.62k 0.1 % 1206 (TNPW12065K62BEEA), C101 2.2 nF C0G/X7R 1206 stacked on it.</text>
+<text x="463" y="484.0" font-size="4.6" fill="#222" text-anchor="start">TSS3 → R102 5.62k 0.1 % 1206 (ERA-8AEB5621V), C101 2.2 nF C0G/X7R 1206 stacked on it.</text>
 <circle cx="456" cy="493.4" r="3.2" fill="#b0008a"/>
 <text x="456" y="495.09999999999997" font-size="4.4" fill="#fff" text-anchor="middle" font-weight="bold">8</text>
 <text x="463" y="495.0" font-size="4.6" fill="#222" text-anchor="start">TSS1 → C102 10 µF ≥16 V X5R/X7R 1206, R104 5.49k 0.1 % 1206 (ERA-8AEB5491V) stacked on it.</text>

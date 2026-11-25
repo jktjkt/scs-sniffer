@@ -64,7 +64,7 @@ label(1437, 470, 1605, 112, ["TSS1 (B) → C102 + R104", "C102: 10 µF X5R/X7R 1
 label(1552, 527, 1640, 230, ["GDT1, GDT2: remove"], "red", w=368)
 leader(1552, 760, 1700, 275, "red")
 label(1440, 840, 1555, 990, ["TSS3 (A) → R102 + C101", "R102: 5.62 k 0.1 % 1206", "C101: 2.2 nF C0G/X7R 1206, on top"], "mag", w=440)
-label(1493, 952, 1540, 1122, ["F2 (A) → R101 33 k 0.1 %", "Vishay MMA02040D3302BB300", "MiniMELF, 2 kV 1.2/50 µs"], "mag", w=470)
+label(1493, 952, 1540, 1122, ["F2 (A) → R101 33.2 k 0.1 %", "Vishay SMM02040D3322BB300", "MiniMELF, 2 kV 1.2/50 µs"], "mag", w=470)
 label(1146, 918, 690, 1250, ["R10: remove"], "red", w=360)
 add(f'<polyline points="1160,844 1215,844 1215,1250" fill="none" stroke="{COL["red"]}" stroke-width="3"/>')
 add(f'<circle cx="1160" cy="844" r="6" fill="{COL["red"]}"/>')

@@ -55,8 +55,8 @@
 <line x1="1493" y1="952" x2="1560" y2="1122" stroke="#ff4fd8" stroke-width="3"/>
 <circle cx="1493" cy="952" r="6" fill="#ff4fd8"/>
 <rect x="1540" y="1122" width="470" height="107" rx="8" fill="rgba(0,0,0,0.80)" stroke="#ff4fd8" stroke-width="3"/>
-<text x="1552" y="1155" font-size="25" font-weight="bold" fill="#ff4fd8">F2 (A) → R101 33 k 0.1 %</text>
-<text x="1552" y="1186" font-size="25" font-weight="normal" fill="#fff">Vishay MMA02040D3302BB300</text>
+<text x="1552" y="1155" font-size="25" font-weight="bold" fill="#ff4fd8">F2 (A) → R101 33.2 k 0.1 %</text>
+<text x="1552" y="1186" font-size="25" font-weight="normal" fill="#fff">Vishay SMM02040D3322BB300</text>
 <text x="1552" y="1217" font-size="25" font-weight="normal" fill="#fff">MiniMELF, 2 kV 1.2/50 µs</text>
 <line x1="1146" y1="918" x2="1030" y2="1250" stroke="#ff3b30" stroke-width="3"/>
 <circle cx="1146" cy="918" r="6" fill="#ff3b30"/>
