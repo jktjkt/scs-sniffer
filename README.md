@@ -6,44 +6,6 @@ We are interested in logging some basic events, such as "which unit opened the g
 This does *not* capture the audio or video streams, and that's by design because we do not really want to stomp on people's privacy.
 When deploying, keep in mind that even call metadata, door opening, etc, are typically [PII](https://en.wikipedia.org/wiki/Personal_data).
 
-## Software
-
-Everything is in [`sw/`](sw/):
-
-- [`scs_decoder.h`](sw/scs_decoder.h): header-only C++20 decoder that turns pulse timings (e.g., from the ESP32's RMT) into bytes and validated `A8 ... A3` frames.
-  Frames are 7 or 11 bytes long depending on their first payload byte; payload bytes can take any value, including `A3`.
-- [`scs_protocol.h`](sw/scs_protocol.h): what a frame means, as far as it has been reverse-engineered: lighting/automation commands, state broadcasts, status requests, scenarios, door-entry rings and door lock release.
-  Everything else is reported as `unknown`, with the raw bytes.
-- [`scs_decoder_test.cpp`](sw/scs_decoder_test.cpp), [`scs_protocol_test.cpp`](sw/scs_protocol_test.cpp): tests, written as `static_assert`s; `make -C sw test` compiles them, so a successful build means they all passed.
-- [`scs_esphome.h`](sw/scs_esphome.h) and [`scs-tap.yaml`](sw/scs-tap.yaml): an ESPHome snippet for the M5Stack Unit PoE-P4 ([`U213`](https://docs.m5stack.com/en/unit/Unit_PoE-P4), ESP32-P4).
-  The tap's Grove `T↓R` pin goes to GPIO54, and the `R↑T` pin goes to GPIO53, which is held high.
-  Every frame is logged (e.g., `A8 91 03 60 08 FA A3: ring flat 03`) and handed to an example lambda, as raw hex and as text; malformed captures, stray bytes and glitches are logged with the raw capture.
-- [`scs-tap-poe-p4.yaml`](sw/scs-tap-poe-p4.yaml): a minimal complete device config for the U213 that includes the snippet.
-
-### Reading the diagnostic log
-
-A capture that did not decode cleanly is logged like this:
-
-```
-[W][scs:111]: capture: 0 frames, 0 errors [], 1 stray bytes, 1 glitches, 6 durations
-[W][scs:114]: bytes: FE
-[W][scs:089]: raw[0]: 13 -95 8 -995 5 -2000
-```
-
-- `capture:` counts what the decoder made of one capture: complete frames, errors (by name), bytes outside a frame (`A5` acknowledgements excluded), and glitches (pulses shorter than 8 µs, ignored).
-- `bytes:` every byte decoded from the capture, in order, whether or not it ended up in a frame.
-  A byte whose dips were missed reads as `1` bits, so a lone start bit decodes as `FF`.
-- `raw[n]:` the capture as ESPHome's `remote_receiver` delivers it, 24 values per line, `n` being the index of the first one.
-  Each value is the duration of one level in µs, and the levels alternate:
-  positive = mark = the bus dipped (the tap's output was low), negative = space = the bus was idle.
-  These are durations, not timestamps; a pulse starts at the sum of all values before it.
-  A capture starts with the first mark and ends with the idle that closed it, which is reported as the `idle:` setting (`-2000`).
-  The resolution is 1 µs; the RMT drops pulses shorter than `filter:` (2 µs) before they get here.
-
-In the example, the start bit is a 13 µs pulse, the next pulse starts 108 µs (13 + 95) later, i.e., in bit 0, and the third starts 1111 µs in, after the stop bit; it is only 5 µs long and counts as a glitch.
-On a healthy tap, every pulse is about 30–34 µs long and starts close to a multiple of 104 µs (one bit at 9600 Bd) from the first.
-The raw values can be pasted into a test and replayed with `feed_marks_spaces()`.
-
 ## Hardware
 
 It looks like this is a job for F454, which has been EOL-ed by Legrand, so we have to build some simple bus sniffer.
@@ -112,6 +74,11 @@ Here are the SMD removals and replacements:
 The original photos, the SVG overlays and the scripts that draw them are in [`docs/src/`](docs/src/); `make -C docs/src` rebuilds these pictures.
 
 Then, connect the **SCS +** wire to terminal A or B, and the **SCS -** wire to terminal G.
+
+## Software
+
+The communication protocol is based on a serial link, but with narrow drip-down pulses.
+The ESPHome component therefore uses the RMT periphery, see [this repo](https://github.com/jktjkt/jkt-esphome-components), component `scs_sniffer`.
 
 ## Credits
 
