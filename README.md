@@ -49,6 +49,9 @@ The raw values can be pasted into a test and replayed with `feed_marks_spaces()`
 It looks like this is a job for F454, which has been EOL-ed by Legrand, so we have to build some simple bus sniffer.
 I was lazy, so I decided to reuse some existing isolated RS-485 converter (even though SCS is very different from [RS-485](https://en.wikipedia.org/wiki/RS-485)).
 This project adapts the M5Stack's RS485-ISO ([`U094`](https://docs.m5stack.com/en/unit/Unit_RS485-ISO)) for passive SCS sniffing.
+Below is the first working prototype:
+
+[![First working prototype](docs/scs-board-prototype.jpg)](docs/scs-board-prototype.jpg)
 
 SCS is a 27 V DC bus that carries power and data on the same two wires.
 Data is UART-like (9600 Bd, 8N1), but a `0` bit is only a short dip in the bus voltage, lasting 34 µs at the start of the 104 µs bit cell; idle and `1` bits leave the bus alone.
